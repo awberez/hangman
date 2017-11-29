@@ -1,6 +1,6 @@
 const inquirer = require("inquirer"), Word = require("./word.js"), Letter = require("./letter.js");
 
-let newWord, letterArr, guessArr, totalRight, wrongLeft;
+let newWord, letterArr, guessArr, totalRight, wrongLeft, winStreak = 0;
 
 function startGame() {
 	newWord = new Word(), letterArr = [], guessArr = [], totalRight = 0, wrongLeft = 9;
@@ -44,9 +44,9 @@ function userPrompt() {
 			guessArr.push(response.guess.toLowerCase());
 			displayGame(true);
 			totalRight == newWord.chosen.length 
-				? (console.log(`You win! The word was "${newWord.chosen}".\n`), playAgain())
+				? (console.log(`You win! The word was "${newWord.chosen}".\n`), winStreak++, console.log(`Current winning streak: ${winStreak}\n`), playAgain())
 				: wrongLeft == 0 
-					? (console.log(`\nYou lose! The word was "${newWord.chosen}".\n`), playAgain())
+					? (console.log(`\nYou lose! The word was "${newWord.chosen}".\n`), winStreak = 0, playAgain())
 					: userPrompt();
 		});
 }
