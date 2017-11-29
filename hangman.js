@@ -37,7 +37,7 @@ function userPrompt() {
 			guessArr.push(response.guess.toLowerCase());
 			displayGame(true);
 			totalRight == newWord.chosen.length 
-				? (console.log(`You win!\n`), playAgain())
+				? (console.log(`You win! The word was "${newWord.chosen}".\n`), playAgain())
 				: wrongLeft == 0 
 					? (console.log(`\nYou lose! The word was "${newWord.chosen}".\n`), playAgain())
 					: userPrompt();
