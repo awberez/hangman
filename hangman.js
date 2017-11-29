@@ -11,10 +11,10 @@ function startGame() {
 
 function displayGame(guess) {
 	let displayArr = [], newRight = 0;
-	for (let index of letterArr) {
+	for (let letter of letterArr) {
 		let match = false;
-		for (let guess of guessArr) if (index.visible == guess) match = true;
-		match ? (displayArr.push(index.visible), newRight++) : displayArr.push(index.hidden);
+		for (let guess of guessArr) if (letter.visible == guess) match = true;
+		match ? (displayArr.push(letter.visible), newRight++) : displayArr.push(letter.hidden);
 	}
 	if (guess && newRight > totalRight) {
 		console.log(`\nCorrect!`);
@@ -48,7 +48,7 @@ function playAgain() { inquirer.prompt([{ type: "confirm", message: "Play again?
 
 function validateNew(letter) {
 	if (letter == "exit") return true;
-	let noMatch = true
+	let noMatch = true;
 	for (let guess of guessArr) if (letter == guess) noMatch = false;
 	return (letter.match(/^[A-Za-z]+$/) && letter.length == 1) ? noMatch || "You've already guessed that letter!" : false || "Invalid guess!";
 }
