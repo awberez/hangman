@@ -1,56 +1,37 @@
-const inquirer = require("inquirer"), Word = require("./word.js"), Letter = require("./letter.js");
+const inquirer = require("inquirer"), colors = require("colors"), Word = require("./word.js"), Validation = require("./validate.js");
 
 let newWord, letterArr, guessArr, totalRight, wrongLeft, winStreak = 0;
 
 function startGame() {
-	newWord = new Word(), letterArr = [], guessArr = [], totalRight = 0, wrongLeft = 9;
-	for (let i = 0; i < newWord.chosen.length; i++) letterArr.push(new Letter(newWord.chosen[i]));
-	displayGame();
+	newWord = new Word(), letterArr = newWord.createLetters(), guessArr = [], totalRight = 0, wrongLeft = 9;
+	console.log(`\n${`${letterArr.map(Letter => Letter.hidden).join(' ')}`.blue.bold}\n`);
 	userPrompt();
-}
-
-function displayGame(guess) {
-	let displayArr = [], nowRight = 0;
-	for (let letter of letterArr) {
-		let match = false;
-		for (let guess of guessArr) if (letter.visible == guess) match = true;
-		match ? (displayArr.push(letter.visible), nowRight++) : displayArr.push(letter.hidden);
-	}
-	if (guess && nowRight > totalRight) {
-		console.log(`\nCorrect!`);
-		totalRight = nowRight;
-		console.log(`\n${displayArr.join(" ")}\n`);
-	}
-	else if (guess) {
-		wrongLeft--;
-		if (wrongLeft > 1) console.log(`\nIncorrect! ${wrongLeft} guesses remaining!\n`);
-		else if (wrongLeft) console.log(`\nIncorrect! ${wrongLeft} guess remaining!\n`);
-	}
-	else console.log(`\n${displayArr.join(" ")}\n`);
-}
-
-function validateNew(letter) {
-	if (letter == "exit") return true;
-	let noMatch = true;
-	for (let guess of guessArr) if (letter == guess) noMatch = false;
-	return (letter.match(/^[A-Za-z]+$/) && letter.length == 1) ? noMatch || "You've already guessed that letter!" : false || "Invalid guess!";
 }
 
 function userPrompt() {
 	inquirer
-		.prompt([ {type: "input", message: "Guess a letter!", name: "guess", validate: validateNew }])
+		.prompt([ {type: "input", message: "Guess a letter!".gray.reset, name: "guess", validate: validCheck }])
 		.then((response)=>{
-			if (response.guess == "exit") return;
 			guessArr.push(response.guess.toLowerCase());
-			displayGame(true);
-			totalRight == newWord.chosen.length 
-				? (console.log(`You win! The word was "${newWord.chosen}".\n`), winStreak++, console.log(`Current winning streak: ${winStreak}\n`), playAgain())
-				: wrongLeft == 0 
-					? (console.log(`\nYou lose! The word was "${newWord.chosen}".\n`), winStreak = 0, playAgain())
+			displayGuess();
+			totalRight == newWord.word.length
+				? (winStreak++, console.log(`${'YOU WIN!'.green.bold} ${'The word was:'.yellow} ${`${newWord.word}`.cyan}\n\n${'Current winning streak:'.yellow} ${`${winStreak}`.magenta}\n`), playAgain())
+				: !wrongLeft
+					? (winStreak = 0, console.log(`\n${'YOU LOSE!'.red.bold} ${'The word was:'.yellow} ${`${newWord.word}`.cyan}\n`), playAgain())
 					: userPrompt();
 		});
 }
 
-function playAgain() { inquirer.prompt([{ type: "confirm", message: "Play again?", name: "replay" }]).then((response)=>{ if (response.replay) startGame(); }); }
+function validCheck(guess) { return new Validation(guess, guessArr).check(); }
+
+function displayGuess() {
+	let resultArr = [], nowRight = 0, wrong = false;
+	for (let letter of letterArr) resultArr.push(letter.guessCheck(guessArr));
+	for (let result of resultArr) if (result != "_") nowRight++;
+	totalRight < nowRight ? (totalRight = nowRight, console.log(`\n${'Correct!'.green.bold}\n\n${`${resultArr.join(" ")}`.blue.bold}\n`)) : (wrong = true, wrongLeft--);
+	if (wrong && wrongLeft) console.log(`\n${'Incorrect!'.red.bold} ${'Wrong guesses remaining:'.yellow} ${`${wrongLeft}`.magenta}\n`);
+}
+
+function playAgain() { inquirer.prompt([{ type: "confirm", message: "Play again?".gray.reset, name: "replay" }]).then((response)=>{ if (response.replay) startGame(); }); }
 
 startGame();

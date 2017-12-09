@@ -4,6 +4,7 @@
   "description": "",
   "main": "hangman.js",
   "dependencies": {
+    "colors": "^1.1.2",
     "inquirer": "^4.0.0",
     "random-words": "^0.0.1"
   },
